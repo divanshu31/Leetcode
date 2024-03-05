@@ -1,7 +1,7 @@
 class Solution {
 public:
     int sumOfUnique(vector<int>& nums) {
-        map<int, int> naksha;
+        unordered_map<int, int> naksha;
         for(int i = 0; i < nums.size(); i++){
             naksha[nums[i]]++;
         }
