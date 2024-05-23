@@ -1,0 +1,37 @@
+class Solution {
+public:
+    int beautifulSubsets(vector<int>& nums, int k) {
+        int n = nums.size();
+        sort(nums.begin(), nums.end());
+        unordered_map<int, int> group;  // map each num to a group, numbers within each group are k apart
+        unordered_map<int, int> count_occ;  // count the number of occurrences of each number
+        vector<vector<int>> group_members;
+        for (int num: nums){
+            if (group.find(num - k) != group.end() || group.find(num) != group.end()){
+                if (group.find(num) == group.end()){  // consider the case that this number has appeared before
+                    group_members[group[num - k]].push_back(num);
+                    group[num] = group[num - k];
+                }
+            } else {  // create a new group
+                group[num] = group_members.size();
+                group_members.push_back({num});
+            }
+            ++count_occ[num];
+        }
+        long long res = 1;
+        for (vector<int>& members: group_members){
+            int group_size = members.size();
+            vector<vector<int>> dp(2, vector<int>(group_size));
+            // dp[0][j] is the number of beautiful subsets within the group, up to members[j], excluding members[j]
+            // dp[1][j] is the same quantity, including members[j]
+            dp[0][0] = 1;
+            dp[1][0] = (1 << count_occ[members[0]]) - 1;
+            for (int i = 1; i < group_size; ++i){
+                dp[0][i] = dp[0][i - 1] + dp[1][i - 1];
+                dp[1][i] = ((1 << count_occ[members[i]]) - 1) * dp[0][i - 1];
+            }
+            res *= dp[0][group_size - 1] + dp[1][group_size - 1];
+        }
+        return res - 1;  // -1 because we want non-empty subsets
+    }
+};
