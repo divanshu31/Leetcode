@@ -1,13 +1,10 @@
 class Solution {
 public:
     int singleNumber(vector<int>& nums) {
-        unordered_map<int, int> naksha;
-        for(auto num : nums){
-            naksha[num]++;
+        sort(nums.begin(), nums.end());
+        for(int i = 1; i < nums.size(); i+=2){
+            if(nums[i] != nums[i-1]) return nums[i - 1];
         }
-        for(auto it = naksha.begin(); it != naksha.end(); it++){
-            if(it -> second == 1) return it -> first;
-        }
-        return -1;
+        return nums[nums.size() - 1];
     }
 };
