@@ -1,51 +1,74 @@
 class Solution {
 public:
+    pair<int,int> fun(int a, int b, int c) {
+        int k1 = max(max(a,b),c);
+        int k2;
+        if(k1==a) k2 = max(b,c);
+        if(k1==b) k2 = max(a,c);
+        if(k1==c) k2 = max(a,b);
+
+        return make_pair(k1,k2);
+    }
+    
     string longestDiverseString(int a, int b, int c) {
-        //using max heap
-        priority_queue<pair<int,char>>pq;
-        if(a)
-        pq.push({a,'a'});
-        if(b)
-        pq.push({b,'b'});
-        if(c)
-        pq.push({c,'c'});
-        string ans="";
-        while(pq.size()>1){
-            pair<int,char>one = pq.top();pq.pop();
-            pair<int,char>two = pq.top();pq.pop();
-            if(one.first>=2){
-                ans+=one.second;
-                ans+=one.second;
-                one.first-=2;
+        string res = "";
+        int curr = 0;
+
+        while((a+b+c)>0) {
+            cout<<a<<" "<<b<<" "<<c<<"\n";
+            cout<<res<<" "<<curr<<"\n";
+            pair<int,int> p = fun(a,b,c);
+            if(p.first==a) {
+                if(res.size()>=2) {
+                    if(res[curr-2]=='a' && res[curr-1]=='a') {
+                        if(p.second==0) return res;
+                        if(p.second==b) { res = res + "b"; b--; }
+                        else { res = res + "c"; c--; }
+                    }
+                    else {
+                        res = res + "a";
+                        a--;
+                    }
+                } else {
+                    res = res + "a";
+                    a--;
+                }
+                curr++;
+            } else if(p.first==b){
+                if(res.size()>=2) {
+                    if(res[curr-2]=='b' && res[curr-1]=='b') {
+                        if(p.second==0) return res;
+                        if(p.second==a) { res = res + "a"; a--; }
+                        else { res = res + "c"; c--; }
+                    }
+                    else {
+                        res = res + "b";
+                        b--;
+                    }
+                } else {
+                    res = res + "b";
+                    b--;
+                }
+                curr++;
+            } else {
+                if(res.size()>=2) {
+                    if(res[curr-2]=='c' && res[curr-1]=='c') {
+                        if(p.second==0) return res;
+                        if(p.second==b) { res = res + "b"; b--; }
+                        else { res = res + "a"; a--; }
+                    }
+                    else {
+                        res = res + "c";
+                        c--;
+                    }
+                } else {
+                    res = res + "c";
+                    c--;
+                }
+                curr++;
             }
-            else{
-                ans+=one.second;
-                one.first-=1;
-            }
-            if(two.first>=2 && two.first>=one.first){
-                ans+=two.second;
-                ans+=two.second;
-                two.first-=2;
-            }
-            else{
-                ans+=two.second;
-                two.first-=1;
-            }
-            if(one.first>0)
-                pq.push(one);
-            if(two.first>0)
-                pq.push(two);
         }
-        if(pq.empty())
-            return ans;
-        if(pq.top().first>=2){
-            ans+=pq.top().second;
-            ans+=pq.top().second;
-        }
-        else{
-            ans+=pq.top().second;
-        }
-        return ans;
-        
+
+        return res;
     }
 };
