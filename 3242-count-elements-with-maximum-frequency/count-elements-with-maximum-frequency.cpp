@@ -1,17 +1,16 @@
 class Solution {
 public:
     int maxFrequencyElements(vector<int>& nums) {
-        map<int, int> naksha;
-        int maxi = INT_MIN, c = 0;
-        int n = nums.size();
-
-        for(int i = 0; i < n; i++){
-            naksha[nums[i]]++;
-            maxi = max(maxi, naksha[nums[i]]);
+        uint8_t freq[101] = {0};
+        uint8_t max = 0, res = 0;
+        for (int n : nums) {
+            uint8_t f = ++freq[n];
+            if (f > max) {
+                max = f;
+                res = f;
+            } else if (f == max)
+                res += f;
         }
-        for(auto it: naksha){
-            if(it.second == maxi) c += it.second;
-        }
-        return c;
+        return res;
     }
 };
