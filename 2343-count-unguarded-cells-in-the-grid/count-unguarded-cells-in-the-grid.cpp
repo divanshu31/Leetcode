@@ -1,52 +1,99 @@
+// union find class with Size & components
+class UnionFind {
+    int root[100001], Size[100001];
+public:
+    int components;
+    //Constructor using initializer list
+    UnionFind(int n): components(n+1){
+        fill(Size, Size+n+1, 1);
+        iota(root, root+n+1, 0);//[0,1,...,n]    
+    }
+    
+    int Find(int x) {//Path Compression O(alpha(n))
+        if (x==root[x]) 
+            return x;
+        return root[x] = Find(root[x]);
+    }
+
+    bool Union(int x, int y) { //Union by Size O(alpha(n))   
+        x=Find(x), y=Find(y);
+        
+        if (x == y) return 0;
+        
+        if (Size[x] > Size[y]) {
+            Size[x] +=Size[y];
+            root[y] = x;
+        } 
+        else {
+            Size[y] += Size[x];
+            root[x] = y;
+        }       
+        components--;
+        return 1;
+    }     
+};
+
 class Solution {
 public:
-    void dfs(int r, int c, string dir, vector<vector<int>>& vis, map<pair<int, int>, int>& mp){
-        int n = vis.size();
-        int m = vis[0].size();
-        if(r<0 || c<0 || r>=n || c>=m) return;
-        if(mp.find({r, c})!=mp.end()) return;
-        else vis[r][c] = 1;
-
-        if(dir == "r"){
-            dfs(r, c+1, "r", vis, mp);
+    bitset<100000> grid=0;
+    int m, n, N;
+    inline int  idx(int r, int c){
+        return r*n+c;
+    }
+    void cross(int r, int c, UnionFind& G) {
+        // downwards
+        for (int i = r + 1; i < m; i++) {
+            if (grid[idx(i, c)]) break;
+            G.Union(idx(i, c), N); // connect to N
         }
-        if(dir == "l"){
-            dfs(r, c-1, "l", vis, mp);
+        // upwards
+        for (int i = r - 1; i >= 0; i--) {
+            if (grid[idx(i, c)]) break;
+            G.Union(idx(i, c), N); // connect to N
         }
-        if(dir == "u"){
-            dfs(r-1, c, "u", vis, mp);
+        // rightwards
+        for (int j = c + 1; j < n; j++) {
+            if (grid[idx(r, j)]) break;
+            G.Union(idx(r, j), N); // connect to N
         }
-        if(dir == "d"){
-            dfs(r+1, c, "d", vis, mp);
+        // leftwards
+        for (int j = c - 1; j >= 0; j--) {
+            if (grid[idx(r, j)]) break;
+            G.Union(idx(r, j), N); // connect to N
         }
     }
+
     int countUnguarded(int m, int n, vector<vector<int>>& guards, vector<vector<int>>& walls) {
-        vector<vector<int>> vis(m, vector<int> (n));
-        queue<pair<int, int>> q;
-        map<pair<int, int>, int> mp;
-        for(auto it: guards){
-            q.push({it[0], it[1]});
-            mp[{it[0], it[1]}]++;
-            vis[it[0]][it[1]] = 1;
+        this->m = m, this->n = n;
+        N=n*m;
+        UnionFind G(N);
+
+        // Mark walls
+        for (auto& ij : walls){
+            int r = ij[0], c = ij[1];
+            grid[idx(r, c)] = 1;
+            G.components--;
         }
-        for(auto it: walls) {
-            mp[{it[0], it[1]}]++;
-            vis[it[0]][it[1]] = 1;
+        // Mark guards 
+        for (auto& ij : guards){
+            int r = ij[0], c = ij[1];
+            grid[idx(r, c)] = 1;
+            G.components--;
         }
-        for(auto it: guards){
-            int r = it[0];
-            int c = it[1];
-            dfs(r, c+1, "r", vis, mp);
-            dfs(r, c-1, "l", vis, mp);
-            dfs(r+1, c, "d", vis, mp);
-            dfs(r-1, c, "u", vis, mp);
+        // connect guarded Cells to N
+        for (auto& ij : guards) {
+            int r = ij[0], c = ij[1];
+            cross(r, c, G);
         }
-        int cnt=0;
-        for(int i=0; i<m; i++){
-            for(int j=0; j<n; j++){
-                if(vis[i][j] == 0) cnt++;
-            }
-        }
-        return cnt;
+        return G.components-1;
     }
 };
+
+
+
+auto init = []() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    return 'c';
+}();
